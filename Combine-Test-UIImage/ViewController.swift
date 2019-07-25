@@ -11,20 +11,14 @@ import Combine
 
 class ViewController: UIViewController {
     
-    deinit {
-            print("Deinit ViewController")
-        }
-    
     @IBOutlet var img: UIImageView!
     
     var subCancellable: AnyCancellable?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-         original()
+        original()
         //method1()
-        
-        
     }
     
     func method1() {
@@ -35,31 +29,30 @@ class ViewController: UIViewController {
             .catch { err in
                 return Just(UIImage())
         }
-
+            
             .eraseToAnyPublisher()
             .receive(on: RunLoop.main)
         
-//            .assign(to: \.image, on: img)
-            // sometime the above ^^^ line gives error so we use below .sink to pass image
-            
-          let subcancel = sub
+        //            .assign(to: \.image, on: img)
+        // sometime the above ^^^ line gives error so we use below .sink to pass image
+        
+        let subCancel = sub
             .sink(receiveCompletion: { completion in
-                        print("✅ .sink() received the completion", String(describing: completion))
-                        switch completion {
-                            case .finished:
-                                break
-                            case .failure(let anError):
-                                print("❌ received error: ", anError)
-                        }
-                }, receiveValue: { image in
-                    print("✅ .sink() image received!")
-                    self.img.image = image
-                })
+                print("✅ .sink() received the completion", String(describing: completion))
+                switch completion {
+                case .finished:
+                    break
+                case .failure(let anError):
+                    print("❌ received error: ", anError)
+                }
+            }, receiveValue: { image in
+                print("✅ .sink() image received!")
+                self.img.image = image
+            })
         
         // convert the .sink to an `AnyCancellable` object that we have
-       // referenced from the implied initializers
-       subCancellable = AnyCancellable(subcancel)
-
+        // referenced from the implied initializers
+        subCancellable = AnyCancellable(subCancel)
     }
     
     func original() {
@@ -70,14 +63,11 @@ class ViewController: UIViewController {
                 guard let image = UIImage(data: data) else { return nil }
                 return image
         }
-            .replaceError(with: UIImage())
+        .replaceError(with: UIImage())
 //            .subscribe(on: DispatchQueue.main) // will give error
             .receive(on: DispatchQueue.main)
             .assign(to: \.image, on: img)
         sub.cancel()
-        
     }
-    
-    
 }
 
